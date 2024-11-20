@@ -85,33 +85,28 @@
     </figure>
     <button id="exportButton">Export to Excel</button>
 
+    <input type="checkbox" id="MQ135"/>
     <script>
-        // Initialize EraWidget
-        const eraWidget = new EraWidget();
-        let config = null;
-        let MQ135 = 0; // Default value for MQ135 sensor
-        const dataBuffer = []; // Buffer to store MQ135 values
+         // Era Widget initialization
+         const eraWidget = new EraWidget();
+         let config = null;
+         let heartbeatValue = 0; // Khởi tạo giá trị nhịp tim mặc định
+         const dataBuffer = [];
+ 
+         eraWidget.onConfiguration((configuration) => {
+             config = configuration.realtime_configs[0];
+         });
+ 
+         eraWidget.onValues((values) => {
+             const input = document.getElementById('MQ135');
+             heartbeatValue = values[config.id].value; // Giả sử values[config.id].value là nhịp tim thực tế
+             input.checked = values[config.id].value > 0; // Đặt trạng thái của checkbox dựa trên nhịp tim
+         });
+ 
+         eraWidget.ready();
 
-        // Set up EraWidget configuration and real-time data handling
-        eraWidget.onConfiguration((configuration) => {
-            config = configuration.realtime_configs.find(cfg => cfg.name === "MQ135"); // Look for MQ135 sensor config
-        });
 
-        eraWidget.onValues((values) => {
-            if (config && values[config.id]) {
-                MQ135 = values[config.id].value; // Update MQ135 value
-                const currentTime = new Date().getTime();
-                dataBuffer.push([currentTime, MQ135]);
 
-                // Limit buffer to 30 minutes
-                const thirtyMinutesAgo = currentTime - 1800 * 1000;
-                while (dataBuffer.length > 0 && dataBuffer[0][0] < thirtyMinutesAgo) {
-                    dataBuffer.shift();
-                }
-            }
-        });
-
-        eraWidget.ready();
 
         // Initialize Highcharts Gauge
         const chart = Highcharts.chart('container', {
@@ -215,7 +210,7 @@
             })));
 
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'MQ135 Data');
+            XLSX.utils.book_append_sheet(wb, ws, 'MQ135');
             XLSX.writeFile(wb, 'mq135_data.xlsx');
         });
     </script>
