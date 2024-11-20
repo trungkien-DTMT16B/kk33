@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Heartbeat Gauge</title>
+    <title>Live MQ135 Gauge</title>
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/highcharts-more.js"></script>
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
@@ -80,7 +80,7 @@
     <figure class="highcharts-figure">
         <div id="container"></div>
         <p class="highcharts-description">
-            Live Heartbeat Gauge updating dynamically with data from EraWidget.
+            Live MQ135 Sensor Gauge updating dynamically with data from EraWidget.
         </p>
     </figure>
     <button id="exportButton">Export to Excel</button>
@@ -89,19 +89,19 @@
         // Initialize EraWidget
         const eraWidget = new EraWidget();
         let config = null;
-        let heartbeatValue = 0; // Default value
-        const dataBuffer = []; // Buffer to store heartbeat values
+        let mq135Value = 0; // Default value
+        const dataBuffer = []; // Buffer to store MQ135 values
 
         // Set up EraWidget configuration and real-time data handling
         eraWidget.onConfiguration((configuration) => {
-            config = configuration.realtime_configs[0];
+            config = configuration.realtime_configs.find(cfg => cfg.name === "MQ135"); // Look for MQ135 sensor config
         });
 
         eraWidget.onValues((values) => {
             if (config && values[config.id]) {
-                heartbeatValue = values[config.id].value; // Update heartbeat value
+                mq135Value = values[config.id].value; // Update MQ135 value
                 const currentTime = new Date().getTime();
-                dataBuffer.push([currentTime, heartbeatValue]);
+                dataBuffer.push([currentTime, mq135Value]);
 
                 // Limit buffer to 30 minutes
                 const thirtyMinutesAgo = currentTime - 1800 * 1000;
@@ -125,7 +125,7 @@
             },
 
             title: {
-                text: 'Heartbeat Monitor'
+                text: 'MQ135 Sensor Monitor'
             },
 
             pane: {
@@ -175,13 +175,13 @@
             },
 
             series: [{
-                name: 'Heartbeat',
+                name: 'MQ135',
                 data: [0],
                 tooltip: {
-                    valueSuffix: ' BPM'
+                    valueSuffix: ' ppm'
                 },
                 dataLabels: {
-                    format: '{y} BPM',
+                    format: '{y} ppm',
                     borderWidth: 0,
                     style: {
                         fontSize: '16px'
@@ -204,19 +204,19 @@
         // Update the gauge dynamically
         setInterval(() => {
             const point = chart.series[0].points[0];
-            point.update(heartbeatValue);
+            point.update(mq135Value);
         }, 1000);
 
         // Export data to Excel
         document.getElementById('exportButton').addEventListener('click', () => {
             const ws = XLSX.utils.json_to_sheet(dataBuffer.map(point => ({
                 Time: (new Date(point[0])).toLocaleString(),
-                Heartbeat: point[1]
+                MQ135: point[1]
             })));
 
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Heartbeat Data');
-            XLSX.writeFile(wb, 'heartbeat_data.xlsx');
+            XLSX.utils.book_append_sheet(wb, ws, 'MQ135 Data');
+            XLSX.writeFile(wb, 'mq135_data.xlsx');
         });
     </script>
 </body>
