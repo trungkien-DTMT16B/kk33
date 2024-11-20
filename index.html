@@ -199,7 +199,7 @@
         // Update the gauge dynamically
         setInterval(() => {
             const point = chart.series[0].points[0];
-            point.update(MQ135);
+            point.update(heartbeatValue);
         }, 1000);
 
         // Export data to Excel
