@@ -89,7 +89,7 @@
         // Initialize EraWidget
         const eraWidget = new EraWidget();
         let config = null;
-        let mq135Value = 0; // Default value
+        let MQ135 = 0; // Default value for MQ135 sensor
         const dataBuffer = []; // Buffer to store MQ135 values
 
         // Set up EraWidget configuration and real-time data handling
@@ -99,9 +99,9 @@
 
         eraWidget.onValues((values) => {
             if (config && values[config.id]) {
-                mq135Value = values[config.id].value; // Update MQ135 value
+                MQ135 = values[config.id].value; // Update MQ135 value
                 const currentTime = new Date().getTime();
-                dataBuffer.push([currentTime, mq135Value]);
+                dataBuffer.push([currentTime, MQ135]);
 
                 // Limit buffer to 30 minutes
                 const thirtyMinutesAgo = currentTime - 1800 * 1000;
@@ -204,7 +204,7 @@
         // Update the gauge dynamically
         setInterval(() => {
             const point = chart.series[0].points[0];
-            point.update(mq135Value);
+            point.update(MQ135);
         }, 1000);
 
         // Export data to Excel
